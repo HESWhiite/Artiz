@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artiz Platform - 100% Free Marketplace</title>
+    <link rel="stylesheet" href="ARTIZ.CSS">
+    <link rel="icon" type="image/x-icon" href="1000373469.jpg">
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="nav-container">
+            <a href="#" class="logo" onclick="showPage('landing')">
+                <img src="1000373469.jpg" alt="Artiz Logo" height="40">
+                <span>Artiz</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#" onclick="showPage('about')">About</a>
+                <a href="#" onclick="showPage('features')">Features</a>
+                <a href="#" onclick="showPage('find-artisan')">Find Artisan</a>
+                <a href="#" onclick="showPage('how-it-works')">How It Works</a>
+                <a href="#" onclick="showPage('contact')">Contact</a>
+
+                <div class="auth-links">
+                    <div class="logged-out">
+                        <a href="#" onclick="showPage('login')" class="btn btn-outline">Log In</a>
+                        <a href="#" onclick="showPage('register')" class="btn btn-primary">Sign Up Free</a>
+                    </div>
+                    <div class="logged-in" style="display: none;">
+                        <div class="user-menu">
+                            <span class="user-name">Hi, User</span>
+                            <div class="dropdown">
+                                <a href="#" onclick="goToDashboard()">My Dashboard</a>
+                                <a href="#" onclick="logout()">Log Out</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Floating Chat Support Button -->
+    <div class="chat-support-btn" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
+        <span>Need Help?</span>
+    </div>
+
+    <!-- Chat Support Widget -->
+    <div class="chat-widget">
+        <div class="chat-header">
+            <h4><i class="fas fa-headset"></i> Artiz Support</h4>
+            <button class="close-chat" onclick="toggleChat()">×</button>
+        </div>
+        <div class="chat-messages">
+            <div class="message bot">
+                <p>Hello! How can we help you today?</p>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message..." id="chatMessage">
+            <button onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Main Content - All Pages -->
+    <main>
+        <!-- Landing Page -->
+        <section id="landing" class="page active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1>Connecting <span class="highlight">Skills</span> To <span class="highlight">Needs</span></h1>
+                    <p class="tagline">Nigeria's first 100% free marketplace for artisans and customers. No commissions, no hidden fees.</p>
+
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <h3>10,000+</h3>
+                            <p>Verified Artisans</p>
+                        </div>
+                        <div class="stat">
+                            <h3>50,000+</h3>
+                            <p>Jobs Completed</p>
+                        </div>
+                        <div class="stat">
+                            <h3>100%</h3>
+                            <p>Payment Protected</p>
+                        </div>
+                        <div class="stat">
+                            <h3>₦0</h3>
+                            <p>Platform Fees</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary btn-large" onclick="showPage('find-artisan')">
+                            <i class="fas fa-search"></i> Find an Artisan
+                        </button>
+                        <button class="btn btn-secondary btn-large" onclick="showPage('register', 'artisan')">
+                            <i class="fas fa-tools"></i> Join as Artisan
+                        </button>
+                        <button class="btn btn-outline btn-large" onclick="showPage('how-it-works')">
+                            <i class="fas fa-play-circle"></i> See How It Works
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hero-image">
+                    <div class="artisan-gallery">
+                        <div class="artisan-photo">
+                            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Nigerian Artisan 1">
+                            <div class="photo-label">Plumber</div>
+                        </div>
+                        <div class="artisan-photo">
+                            <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Nigerian Artisan 2">
+                            <div class="photo-label">Electrician</div>
+                        </div>
+                        <div class="artisan-photo">
+                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w-600&q=80" alt="Nigerian Artisan 3">
+                            <div class="photo-label">Carpenter</div>
+                        </div>
+                        <div class="artisan-photo">
+                            <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Nigerian Artisan 4">
+                            <div class="photo-label">Welder</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-preview">
+                <h2>Why Choose Artiz?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <h3>100% Free</h3>
+                        <p>No commissions, no hidden fees. Artisans keep 100% of their earnings.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-user-shield"></i>
+                        <h3>Verified Artisans</h3>
+                        <p>All artisans are ID verified with portfolio and customer reviews.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-lock"></i>
+                        <h3>Payment Protection</h3>
+                        <p>Your money is held securely until you confirm job completion.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-star"></i>
+                        <h3>Quality Guaranteed</h3>
+                        <p>Two-way rating system ensures quality service and respectful customers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Find Artisan Page -->
+        <section id="find-artisan" class="page">
+            <div class="page-header">
+                <h2>Find Verified Artisans</h2>
+                <p>Browse and connect with skilled professionals near you</p>
+            </div>
+
+            <div class="search-filters">
+                <div class="search-box">
+                    <input type="text" placeholder="Search for services (plumbing, electrical, carpentry...)" id="serviceSearch">
+                    <button class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                </div>
+
+                <div class="filter-options">
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="plumbing">Plumbing</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="carpentry">Carpentry</option>
+                        <option value="painting">Painting</option>
+                        <option value="welding">Welding</option>
+                        <option value="tailoring">Tailoring</option>
+                    </select>
+
+                    <select id="locationFilter">
+                        <option value="">All Locations</option>
+                        <option value="lagos">Lagos</option>
+                        <option value="abuja">Abuja</option>
+                        <option value="port-harcourt">Port Harcourt</option>
+                        <option value="ibadan">Ibadan</option>
+                        <option value="kano">Kano</option>
+                    </select>
+
+                    <select id="ratingFilter">
+                        <option value="">Any Rating</option>
+                        <option value="4.5">4.5+ Stars</option>
+                        <option value="4.0">4.0+ Stars</option>
+                        <option value="3.5">3.5+ Stars</option>
+                    </select>
+
+                    <select id="verificationFilter">
+                        <option value="">All Verification Levels</option>
+                        <option value="basic">Basic Verified</option>
+                        <option value="verified">Fully Verified</option>
+                        <option value="trusted">Trusted Artisan</option>
+                        <option value="top-rated">Top Rated</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="artisans-grid">
+                <!-- Artisan Card 1 -->
+                <div class="artisan-card">
+                    <div class="artisan-header">
+                        <div class="artisan-avatar">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Artisan">
+                        </div>
+                        <div class="artisan-info">
+                            <h3>Chinedu Okafor</h3>
+                            <p class="trade">Plumbing Specialist</p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <span>4.5 (128 reviews)</span>
+                            </div>
+                        </div>
+                        <span class="badge trusted">Trusted Artisan</span>
+                    </div>
+
+                    <div class="artisan-details">
+                        <p><i class="fas fa-map-marker-alt"></i> Lagos Mainland • 5km away</p>
+                        <p><i class="fas fa-clock"></i> 10+ years experience</p>
+                        <p><i class="fas fa-check-circle"></i> 98% completion rate</p>
+                    </div>
+
+                    <div class="artisan-services">
+                        <span class="service-tag">Pipe Installation</span>
+                        <span class="service-tag">Leak Repair</span>
+                        <span class="service-tag">Water Heater</span>
+                    </div>
+
+                    <div class="artisan-actions">
+                        <button class="btn btn-outline" onclick="viewArtisanProfile('chinedu')">View Profile</button>
+                        <button class="btn btn-primary" onclick="bookArtisan('chinedu')">Book Now</button>
+                    </div>
+                </div>
+
+                <!-- Artisan Card 2 -->
+                <div class="artisan-card">
+                    <div class="artisan-header">
+                        <div class="artisan-avatar">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Artisan">
+                        </div>
+                        <div class="artisan-info">
+                            <h3>Amina Yusuf</h3>
+                            <p class="trade">Electrical Engineer</p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <span>5.0 (89 reviews)</span>
+                            </div>
+                        </div>
+                        <span class="badge top-rated">Top Rated</span>
+                    </div>
+
+                    <div class="artisan-details">
+                        <p><i class="fas fa-map-marker-alt"></i> Abuja • 8km away</p>
+                        <p><i class="fas fa-clock"></i> 8 years experience</p>
+                        <p><i class="fas fa-check-circle"></i> 100% completion rate</p>
+                    </div>
+
+                    <div class="artisan-services">
+                        <span class="service-tag">Wiring</span>
+                        <span class="service-tag">Generator Repair</span>
+                        <span class="service-tag">Solar Installation</span>
+                    </div>
+
+                    <div class="artisan-actions">
+                        <button class="btn btn-outline" onclick="viewArtisanProfile('amina')">View Profile</button>
+                        <button class="btn btn-primary" onclick="bookArtisan('amina')">Book Now</button>
+                    </div>
+                </div>
+
+                <!-- Artisan Card 3 -->
+                <div class="artisan-card">
+                    <div class="artisan-header">
+                        <div class="artisan-avatar">
+                            <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Artisan">
+                        </div>
+                        <div class="artisan-info">
+                            <h3>Emeka Nwankwo</h3>
+                            <p class="trade">Carpentry & Furniture</p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <span>4.8 (156 reviews)</span>
+                            </div>
+                        </div>
+                        <span class="badge trusted">Trusted Artisan</span>
+                    </div>
+
+                    <div class="artisan-details">
+                        <p><i class="fas fa-map-marker-alt"></i> Onitsha • 12km away</p>
+                        <p><i class="fas fa-clock"></i> 15+ years experience</p>
+                        <p><i class="fas fa-check-circle"></i> 96% completion rate</p>
+                    </div>
+
+                    <div class="artisan-services">
+                        <span class="service-tag">Furniture Making</span>
+                        <span class="service-tag">Cabinet Installation</span>
+                        <span class="service-tag">Door Repair</span>
+                    </div>
+
+                    <div class="artisan-actions">
+                        <button class="btn btn-outline" onclick="viewArtisanProfile('emeka')">View Profile</button>
+                        <button class="btn btn-primary" onclick="bookArtisan('emeka')">Book Now</button>
+                    </div>
+                </div>
+
+                <!-- Artisan Card 4 -->
+                <div class="artisan-card">
+                    <div class="artisan-header">
+                        <div class="artisan-avatar">
+                            <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Artisan">
+                        </div>
+                        <div class="artisan-info">
+                            <h3>Bisi Adekunle</h3>
+                            <p class="trade">Professional Tailor</p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <span>4.7 (203 reviews)</span>
+                            </div>
+                        </div>
+                        <span class="badge verified">Verified</span>
+                    </div>
+
+                    <div class="artisan-details">
+                        <p><i class="fas fa-map-marker-alt"></i> Ibadan • 3km away</p>
+                        <p><i class="fas fa-clock"></i> 12 years experience</p>
+                        <p><i class="fas fa-check-circle"></i> 99% completion rate</p>
+                    </div>
+
+                    <div class="artisan-services">
+                        <span class="service-tag">Clothing Alterations</span>
+                        <span class="service-tag">Traditional Attire</span>
+                        <span class="service-tag">Bridal Wear</span>
+                    </div>
+
+                    <div class="artisan-actions">
+                        <button class="btn btn-outline" onclick="viewArtisanProfile('bisi')">View Profile</button>
+                        <button class="btn btn-primary" onclick="bookArtisan('bisi')">Book Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pagination">
+                <button class="btn btn-outline">Previous</button>
+                <span class="page-numbers">Page 1 of 5</span>
+                <button class="btn btn-outline">Next</button>
+            </div>
+        </section>
+
+        <!-- Registration Page -->
+        <section id="register" class="page">
+            <div class="registration-container">
+                <div class="registration-header">
+                    <h2>Create Your Free Account</h2>
+                    <p>Join thousands of satisfied users on Artiz</p>
+                </div>
+
+                <div class="user-type-selector">
+                    <div class="type-option active" id="customerOption" onclick="selectUserType('customer')">
+                        <i class="fas fa-user"></i>
+                        <h3>Customer</h3>
+                        <p>Looking for skilled artisans</p>
+                    </div>
+                    <div class="type-option" id="artisanOption" onclick="selectUserType('artisan')">
+                        <i class="fas fa-tools"></i>
+                        <h3>Artisan</h3>
+                        <p>Offering skills & services</p>
+                    </div>
+                </div>
+
+                <!-- Customer Registration Form -->
+                <div id="customerForm" class="registration-form active">
+                    <h3>Customer Registration</h3>
+                    <form onsubmit="registerUser(event, 'customer')">
+                        <div class="form-group">
+                            <label for="custName">Full Name *</label>
+                            <input type="text" id="custName" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="custPhone">Phone Number *</label>
+                                <input type="tel" id="custPhone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="custEmail">Email Address</label>
+                                <input type="email" id="custEmail">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="custPassword">Password *</label>
+                            <input type="password" id="custPassword" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="custLocation">Location *</label>
+                            <input type="text" id="custLocation" placeholder="e.g., Lagos, Abuja" required>
+                        </div>
+
+                        <div class="form-group terms">
+                            <input type="checkbox" id="custTerms" required>
+                            <label for="custTerms">I agree to the Terms & Privacy Policy</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">Create Customer Account</button>
+                    </form>
+
+                    <p class="login-link">Already have an account? <a href="#" onclick="showPage('login')">Log In</a></p>
+                </div>
+
+                <!-- Artisan Registration Form -->
+                <div id="artisanForm" class="registration-form">
+                    <h3>Artisan Registration</h3>
+                    <form onsubmit="registerUser(event, 'artisan')">
+                        <div class="form-group">
+                            <label for="artName">Full Name *</label>
+                            <input type="text" id="artName" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="artPhone">Phone Number *</label>
+                                <input type="tel" id="artPhone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="artEmail">Email Address</label>
+                                <input type="email" id="artEmail">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="artTrade">Primary Trade *</label>
+                            <select id="artTrade" required>
+                                <option value="">Select your trade</option>
+                                <option value="plumbing">Plumbing</option>
+                                <option value="electrical">Electrical</option>
+                                <option value="carpentry">Carpentry</option>
+                                <option value="painting">Painting</option>
+                                <option value="welding">Welding</option>
+                                <option value="tailoring">Tailoring</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="artExperience">Years of Experience *</label>
+                            <select id="artExperience" required>
+                                <option value="">Select experience</option>
+                                <option value="0-1">0-1 years</option>
+                                <option value="1-3">1-3 years</option>
+                                <option value="3-5">3-5 years</option>
+                                <option value="5-10">5-10 years</option>
+                                <option value="10+">10+ years</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="artPassword">Password *</label>
+                            <input type="password" id="artPassword" required>
+                        </div>
+
+                        <div class="form-group terms">
+                            <input type="checkbox" id="artTerms" required>
+                            <label for="artTerms">I agree to the Terms & Privacy Policy</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary btn-full">Create Artisan Account</button>
+                    </form>
+
+                    <p class="login-link">Already have an account? <a href="#" onclick="showPage('login')">Log In</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Page -->
+        <section id="login" class="page">
+            <div class="login-container">
+                <div class="login-header">
+                    <h2>Welcome Back</h2>
+                    <p>Log in to your Artiz account</p>
+                </div>
+
+                <form onsubmit="loginUser(event)">
+                    <div class="form-group">
+                        <label for="loginPhone">Phone Number *</label>
+                        <input type="tel" id="loginPhone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password *</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+
+                    <div class="form-options">
+                        <div class="remember">
+                            <input type="checkbox" id="remember">
+                            <label for="remember">Remember me</label>
+                        </div>
+                        <a href="#" onclick="showPage('forgot-password')">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">Log In</button>
+
+                    <div class="login-divider">
+                        <span>Or continue with</span>
+                    </div>
+
+                    <div class="social-login">
+                        <button type="button" class="btn-social">
+                            <i class="fab fa-google"></i> Google
+                        </button>
+                        <button type="button" class="btn-social">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </button>
+                    </div>
+
+                    <p class="register-link">
+                        Don't have an account? <a href="#" onclick="showPage('register')">Sign Up Free</a>
+                    </p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Customer Dashboard -->
+        <section id="customer-dashboard" class="page">
+            <div class="dashboard-header">
+                <h2>Customer Dashboard</h2>
+                <button class="btn btn-primary" onclick="showPage('find-artisan')">
+                    <i class="fas fa-search"></i> Find Artisan
+                </button>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>2</h3>
+                    <p>Active Bookings</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-history"></i>
+                    <h3>15</h3>
+                    <p>Completed Jobs</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <h3>4.8</h3>
+                    <p>Your Rating</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-wallet"></i>
+                    <h3>₦25,000</h3>
+                    <p>Total Spent</p>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="dashboard-section">
+                    <h3>Recent Bookings</h3>
+                    <div class="bookings-list">
+                        <div class="booking-card">
+                            <div class="booking-info">
+                                <h4>Plumbing Repair</h4>
+                                <p><i class="fas fa-user"></i> Chinedu Okafor</p>
+                                <p><i class="fas fa-calendar"></i> Today, 2:00 PM</p>
+                                <span class="status confirmed">Confirmed</span>
+                            </div>
+                            <button class="btn btn-small" onclick="viewBooking()">View Details</button>
+                        </div>
+                        <div class="booking-card">
+                            <div class="booking-info">
+                                <h4>Electrical Wiring</h4>
+                                <p><i class="fas fa-user"></i> Amina Yusuf</p>
+                                <p><i class="fas fa-calendar"></i> Tomorrow, 10:00 AM</p>
+                                <span class="status pending">Pending</span>
+                            </div>
+                            <button class="btn btn-small" onclick="viewBooking()">View Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-section">
+                    <h3>Favorite Artisans</h3>
+                    <div class="favorites-list">
+                        <div class="favorite-card">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Artisan">
+                            <div>
+                                <h4>Chinedu Okafor</h4>
+                                <p>Plumbing Specialist</p>
+                            </div>
+                            <button class="btn-icon" onclick="messageArtisan()"><i class="fas fa-envelope"></i></button>
+                        </div>
+                        <div class="favorite-card">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Artisan">
+                            <div>
+                                <h4>Amina Yusuf</h4>
+                                <p>Electrical Engineer</p>
+                            </div>
+                            <button class="btn-icon" onclick="messageArtisan()"><i class="fas fa-envelope"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Artisan Dashboard -->
+        <section id="artisan-dashboard" class="page">
+            <div class="dashboard-header">
+                <h2>Artisan Dashboard</h2>
+                <div class="dashboard-actions">
+                    <button class="btn btn-outline" onclick="showPage('artisan-profile')">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-secondary" onclick="showPage('artisan-services')">
+                        <i class="fas fa-plus"></i> Add Service
+                    </button>
+                </div>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <i class="fas fa-bell"></i>
+                    <h3>3</h3>
+                    <p>New Requests</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>5</h3>
+                    <p>Active Jobs</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <h3>4.6</h3>
+                    <p>Your Rating</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-wallet"></i>
+                    <h3>₦125,000</h3>
+                    <p>This Month</p>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="dashboard-section">
+                    <h3>Job Requests</h3>
+                    <div class="requests-list">
+                        <div class="request-card">
+                            <div class="request-info">
+                                <h4>Kitchen Sink Repair</h4>
+                                <p><i class="fas fa-user"></i> Sarah Johnson</p>
+                                <p><i class="fas fa-map-marker-alt"></i> 2.3km away</p>
+                                <p><i class="fas fa-money-bill"></i> ₦8,000 - ₦12,000</p>
+                            </div>
+                            <div class="request-actions">
+                                <button class="btn btn-small btn-success" onclick="acceptJob()">Accept</button>
+                                <button class="btn btn-small btn-outline" onclick="declineJob()">Decline</button>
+                            </div>
+                        </div>
+                        <div class="request-card">
+                            <div class="request-info">
+                                <h4>Bathroom Tiling</h4>
+                                <p><i class="fas fa-user"></i> David Brown</p>
+                                <p><i class="fas fa-map-marker-alt"></i> 5.1km away</p>
+                                <p><i class="fas fa-money-bill"></i> ₦25,000 - ₦35,000</p>
+                            </div>
+                            <div class="request-actions">
+                                <button class="btn btn-small btn-success" onclick="acceptJob()">Accept</button>
+                                <button class="btn btn-small btn-outline" onclick="declineJob()">Decline</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-section">
+                    <h3>Your Performance</h3>
+                    <div class="performance">
+                        <div class="metric">
+                            <span>Response Rate</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 95%"></div>
+                            </div>
+                            <span>95%</span>
+                        </div>
+                        <div class="metric">
+                            <span>Completion Rate</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 98%"></div>
+                            </div>
+                            <span>98%</span>
+                        </div>
+                        <div class="metric">
+                            <span>On-Time Rate</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 92%"></div>
+                            </div>
+                            <span>92%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard -->
+        <section id="admin-dashboard" class="page">
+            <div class="dashboard-header">
+                <h2>Admin Dashboard</h2>
+                <div class="admin-actions">
+                    <button class="btn btn-primary" onclick="showVerifications()">
+                        <i class="fas fa-user-check"></i> Verifications (5)
+                    </button>
+                    <button class="btn btn-secondary" onclick="showDisputes()">
+                        <i class="fas fa-gavel"></i> Disputes (2)
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h3>10,245</h3>
+                    <p>Total Users</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-tools"></i>
+                    <h3>8,567</h3>
+                    <p>Artisans</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>50,892</h3>
+                    <p>Total Jobs</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h3>₦125M</h3>
+                    <p>Total Volume</p>
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <div class="admin-section">
+                    <h3>Recent Activities</h3>
+                    <div class="activity-list">
+                        <div class="activity">
+                            <i class="fas fa-user-plus"></i>
+                            <div>
+                                <p>New artisan registered: Emeka Nwankwo</p>
+                                <small>2 minutes ago</small>
+                            </div>
+                        </div>
+                        <div class="activity">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <p>Job completed: Plumbing repair #J-4892</p>
+                                <small>15 minutes ago</small>
+                            </div>
+                        </div>
+                        <div class="activity">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <p>New dispute reported: Job #J-5678</p>
+                                <small>1 hour ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Pending Verifications</h3>
+                    <div class="verification-list">
+                        <div class="verification-item">
+                            <div>
+                                <h4>Musa Ibrahim</h4>
+                                <p>Electrical • Kano</p>
+                            </div>
+                            <div class="verification-actions">
+                                <button class="btn btn-small btn-success" onclick="approveVerification()">Approve</button>
+                                <button class="btn btn-small btn-outline" onclick="rejectVerification()">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Page -->
+        <section id="features" class="page">
+            <div class="page-header">
+                <h2>Artiz Platform Features</h2>
+                <p>Everything you need, 100% free</p>
+            </div>
+
+            <div class="features-tabs">
+                <button class="tab-btn active" onclick="openFeatureTab('customers')">For Customers</button>
+                <button class="tab-btn" onclick="openFeatureTab('artisans')">For Artisans</button>
+                <button class="tab-btn" onclick="openFeatureTab('platform')">Platform Features</button>
+            </div>
+
+            <div class="features-content">
+                <div id="customers-tab" class="tab-content active">
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Free Account Creation</h4>
+                                <p>Sign up for free with no hidden charges</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Payment Protection</h4>
+                                <p>Your money is held in escrow until job completion</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Verified Artisans</h4>
+                                <p>All artisans are ID verified with background checks</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="artisans-tab" class="tab-content">
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>100% Free</h4>
+                                <p>No commissions, keep all your earnings</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Guaranteed Payments</h4>
+                                <p>Secure escrow payments for every job</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Free Promotion</h4>
+                                <p>Get featured in search results for free</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Page -->
+        <section id="how-it-works" class="page">
+            <div class="page-header">
+                <h2>How Artiz Works</h2>
+                <p>Simple steps to get things done</p>
+            </div>
+
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Find an Artisan</h3>
+                        <p>Search for verified artisans by service, location, or rating</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Book & Pay Securely</h3>
+                        <p>Choose a time and pay securely through escrow</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Get Work Done</h3>
+                        <p>Artisan completes the job professionally</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Confirm & Review</h3>
+                        <p>Confirm completion and rate your experience</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Page -->
+        <section id="about" class="page">
+            <div class="page-header">
+                <h2>About Artiz Platform</h2>
+                <p>Our mission to connect skills to needs</p>
+            </div>
+
+            <div class="about-content">
+                <div class="about-section">
+                    <h3>Our Mission</h3>
+                    <p>Artiz was founded to create a fair marketplace where artisans can connect directly with customers without middlemen taking commissions.</p>
+                    <p>We believe skilled professionals deserve to keep 100% of their earnings while customers get quality service with payment protection.</p>
+                </div>
+
+                <div class="values-grid">
+                    <div class="value-card">
+                        <i class="fas fa-handshake"></i>
+                        <h4>Fairness</h4>
+                        <p>No commissions, transparent pricing</p>
+                    </div>
+                    <div class="value-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Trust</h4>
+                        <p>Verified artisans, secure payments</p>
+                    </div>
+                    <div class="value-card">
+                        <i class="fas fa-users"></i>
+                        <h4>Community</h4>
+                        <p>Building connections across Nigeria</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Page -->
+        <section id="contact" class="page">
+            <div class="page-header">
+                <h2>Contact Us</h2>
+                <p>We're here to help you</p>
+            </div>
+
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Phone Support</h4>
+                            <p>090-ARTIZ-NOW</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <div>
+                            <h4>WhatsApp</h4>
+                            <p>+234-XXX-ARTIZ</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>help@artiz.ng</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="contact-form" onsubmit="sendContactMessage(event)">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Email Address" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Other Pages (Placeholders) -->
+        <section id="forgot-password" class="page">
+            <div class="page-header">
+                <h2>Reset Password</h2>
+            </div>
+            <div class="page-content">
+                <p>Password reset functionality</p>
+                <button onclick="showPage('login')" class="btn btn-outline">Back to Login</button>
+            </div>
+        </section>
+
+        <section id="artisan-profile" class="page">
+            <div class="page-header">
+                <h2>Edit Profile</h2>
+            </div>
+            <div class="page-content">
+                <p>Artisan profile editor</p>
+                <button onclick="showPage('artisan-dashboard')" class="btn btn-outline">Back to Dashboard</button>
+            </div>
+        </section>
+
+        <section id="artisan-services" class="page">
+            <div class="page-header">
+                <h2>Manage Services</h2>
+            </div>
+            <div class="page-content">
+                <p>Service management interface</p>
+                <button onclick="showPage('artisan-dashboard')" class="btn btn-outline">Back to Dashboard</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img src="1000373469.jpg" alt="Artiz Logo" height="40">
+                <p>Connecting Skills To Needs</p>
+            </div>
+
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Platform</h4>
+                    <a href="#" onclick="showPage('about')">About</a>
+                    <a href="#" onclick="showPage('features')">Features</a>
+                    <a href="#" onclick="showPage('how-it-works')">How It Works</a>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Cookies</a>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Support</h4>
+                    <a href="#" onclick="showPage('contact')">Contact</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">Safety</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 Artiz Platform. All rights reserved.<br>From Malc-Nexus Technologies LTD</p>
+        </div>
+    </footer>
+
+    <script>
+        // Page Management
+        function showPage(pageId, param = null) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show requested page
+            const page = document.getElementById(pageId);
+            if (page) {
+                page.classList.add('active');
+                window.scrollTo(0, 0);
+
+                // Handle parameters
+                if (param === 'artisan') {
+                    selectUserType('artisan');
+                } else if (param === 'customer') {
+                    selectUserType('customer');
+                }
+            } else {
+                // Fallback to landing
+                showPage('landing');
+            }
+        }
+
+        // User Registration Type Selection
+        function selectUserType(type) {
+            const customerForm = document.getElementById('customerForm');
+            const artisanForm = document.getElementById('artisanForm');
+            const customerOption = document.getElementById('customerOption');
+            const artisanOption = document.getElementById('artisanOption');
+
+            if (type === 'customer') {
+                customerForm.classList.add('active');
+                artisanForm.classList.remove('active');
+                customerOption.classList.add('active');
+                artisanOption.classList.remove('active');
+            } else if (type === 'artisan') {
+                artisanForm.classList.add('active');
+                customerForm.classList.remove('active');
+                artisanOption.classList.add('active');
+                customerOption.classList.remove('active');
+            }
+        }
+
+        // Registration Function
+        function registerUser(event, userType) {
+            event.preventDefault();
+
+            if (userType === 'customer') {
+                alert('Customer account created! Redirecting to dashboard...');
+                // Simulate login
+                document.querySelector('.logged-out').style.display = 'none';
+                document.querySelector('.logged-in').style.display = 'block';
+                showPage('customer-dashboard');
+            } else if (userType === 'artisan') {
+                alert('Artisan account created! Please complete your profile.');
+                document.querySelector('.logged-out').style.display = 'none';
+                document.querySelector('.logged-in').style.display = 'block';
+                showPage('artisan-dashboard');
+            }
+        }
+
+        // Login Function
+        function loginUser(event) {
+            event.preventDefault();
+            const phone = document.getElementById('loginPhone').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Simulate different user types based on input
+            if (!phone || !password) {
+                alert('Please enter phone and password');
+                return;
+            }
+
+            // Demo: Check for special keywords to determine user type
+            if (phone.includes('admin')) {
+                // Admin login
+                showPage('admin-dashboard');
+            } else if (phone.includes('artisan')) {
+                // Artisan login
+                showPage('artisan-dashboard');
+            } else {
+                // Default to customer login
+                showPage('customer-dashboard');
+            }
+
+            // Update UI to show logged in state
+            document.querySelector('.logged-out').style.display = 'none';
+            document.querySelector('.logged-in').style.display = 'block';
+        }
+
+        // Logout Function
+        function logout() {
+            document.querySelector('.logged-out').style.display = 'flex';
+            document.querySelector('.logged-in').style.display = 'none';
+            showPage('landing');
+            alert('You have been logged out.');
+        }
+
+        // Go to appropriate dashboard
+        function goToDashboard() {
+            // Check current user type (simulated)
+            const userType = localStorage.getItem('userType') || 'customer';
+            if (userType === 'admin') {
+                showPage('admin-dashboard');
+            } else if (userType === 'artisan') {
+                showPage('artisan-dashboard');
+            } else {
+                showPage('customer-dashboard');
+            }
+        }
+
+        // View Artisan Profile
+        function viewArtisanProfile(artisanId) {
+            alert(`Viewing profile of artisan: ${artisanId}`);
+            // In real app, would show detailed profile page
+        }
+
+        // Book Artisan
+        function bookArtisan(artisanId) {
+            const isLoggedIn = document.querySelector('.logged-in').style.display !== 'none';
+
+            if (!isLoggedIn) {
+                if (confirm('You need to log in to book an artisan. Go to login page?')) {
+                    showPage('login');
+                }
+            } else {
+                alert(`Booking request sent to artisan: ${artisanId}`);
+                // In real app, would initiate booking process
+            }
+        }
+
+        // Feature Tabs
+        function openFeatureTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // Chat Support
+        function toggleChat() {
+            const chatWidget = document.querySelector('.chat-widget');
+            chatWidget.style.display = chatWidget.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatMessage');
+            const message = input.value.trim();
+
+            if (message) {
+                const messagesDiv = document.querySelector('.chat-messages');
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user';
+                userMessage.innerHTML = `<p>${message}</p>`;
+                messagesDiv.appendChild(userMessage);
+
+                // Simulate bot response
+                setTimeout(() => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message bot';
+                    botMessage.innerHTML = '<p>Thanks for your message! Our support team will respond shortly.</p>';
+                    messagesDiv.appendChild(botMessage);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }, 1000);
+
+                input.value = '';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set landing page as active
+            showPage('landing');
+
+            // Initialize chat as hidden
+            document.querySelector('.chat-widget').style.display = 'none';
+
+            // Demo: Set up some localStorage for user type simulation
+            if (!localStorage.getItem('userType')) {
+                localStorage.setItem('userType', 'customer');
+            }
+        });
+
+        // Artisan Dashboard Functions
+        function acceptJob() {
+            alert('Job accepted! Customer has been notified.');
+        }
+
+        function declineJob() {
+            if (confirm('Are you sure you want to decline this job?')) {
+                alert('Job declined.');
+            }
+        }
+
+        // Admin Functions
+        function showVerifications() {
+            alert('Showing pending verifications...');
+        }
+
+        function showDisputes() {
+            alert('Showing active disputes...');
+        }
+
+        function approveVerification() {
+            alert('Artisan verification approved!');
+        }
+
+        function rejectVerification() {
+            alert('Artisan verification rejected.');
+        }
+
+        // Customer Dashboard Functions
+        function viewBooking() {
+            alert('Viewing booking details...');
+        }
+
+        function messageArtisan() {
+            alert('Opening message interface...');
+        }
+
+        // Contact Form
+        function sendContactMessage(event) {
+            event.preventDefault();
+            alert('Thank you for your message! We will respond within 24 hours.');
+            event.target.reset();
+        }
+    </script>
+</body>
+
+</html>
