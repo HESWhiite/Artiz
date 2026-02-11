@@ -35,7 +35,7 @@
  .page {
      display: none;
      min-height: calc(100vh - 180px);
-     padding: 30px 20px;
+     padding: 90px 20px 30px;
      max-width: 1200px;
      margin: 0 auto;
      animation: fadeIn 0.5s ease;

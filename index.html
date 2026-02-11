@@ -3,13 +3,248 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artiz Platform - 100% Free Marketplace</title>
     <link rel="stylesheet" href="ARTIZ.CSS">
     <link rel="icon" type="image/x-icon" href="logo.jpeg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
+    <style>
+        /* Toast Notifications */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+        }
+
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 9000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #1a1a2e;
+        }
+
+        .modal-content .form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-content .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-content .form-group input,
+        .modal-content .form-group textarea,
+        .modal-content .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .modal-content .form-group input:focus,
+        .modal-content .form-group textarea:focus,
+        .modal-content .form-group select:focus {
+            border-color: #6c63ff;
+            outline: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        /* Profile View Styles */
+        .profile-view {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .profile-top {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-large img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #6c63ff;
+        }
+
+        .profile-summary {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .profile-summary .bio {
+            margin-top: 12px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .profile-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .profile-section h3 {
+            margin-bottom: 16px;
+        }
+
+        .review-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Service management styles */
+        .service-form {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .my-services-list {
+            margin-top: 12px;
+        }
+
+        /* Status badges */
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status.pending {
+            background: #fef3cd;
+            color: #856404;
+        }
+
+        .status.confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status.in_progress {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.cancelled,
+        .status.declined {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
 </head>
 
 <body>
@@ -81,7 +316,8 @@
             <div class="hero">
                 <div class="hero-content">
                     <h1>Connecting <span class="highlight">Skills</span> To <span class="highlight">Needs</span></h1>
-                    <p class="tagline">Nigeria's first 100% free marketplace for artisans and customers. No commissions, no hidden fees.</p>
+                    <p class="tagline">Nigeria's first 100% free marketplace for artisans and customers. No commissions,
+                        no hidden fees.</p>
 
                     <div class="hero-stats">
                         <div class="stat">
@@ -118,19 +354,23 @@
                 <div class="hero-image">
                     <div class="artisan-gallery">
                         <div class="artisan-photo">
-                            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Nigerian Artisan 1">
+                            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                                alt="Nigerian Artisan 1">
                             <div class="photo-label">Plumber</div>
                         </div>
                         <div class="artisan-photo">
-                            <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Nigerian Artisan 2">
+                            <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                                alt="Nigerian Artisan 2">
                             <div class="photo-label">Electrician</div>
                         </div>
                         <div class="artisan-photo">
-                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w-600&q=80" alt="Nigerian Artisan 3">
+                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w-600&q=80"
+                                alt="Nigerian Artisan 3">
                             <div class="photo-label">Carpenter</div>
                         </div>
                         <div class="artisan-photo">
-                            <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Nigerian Artisan 4">
+                            <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                                alt="Nigerian Artisan 4">
                             <div class="photo-label">Welder</div>
                         </div>
                     </div>
@@ -173,7 +413,8 @@
 
             <div class="search-filters">
                 <div class="search-box">
-                    <input type="text" placeholder="Search for services (plumbing, electrical, carpentry...)" id="serviceSearch">
+                    <input type="text" placeholder="Search for services (plumbing, electrical, carpentry...)"
+                        id="serviceSearch">
                     <button class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
                 </div>
 
@@ -332,25 +573,25 @@
                     </div>
                 </div>
 
-                
 
-                    <div class="artisan-details">
-                        <p><i class="fas fa-map-marker-alt"></i> Ibadan • 3km away</p>
-                        <p><i class="fas fa-clock"></i> 12 years experience</p>
-                        <p><i class="fas fa-check-circle"></i> 99% completion rate</p>
-                    </div>
 
-                    <div class="artisan-services">
-                        <span class="service-tag">Clothing Alterations</span>
-                        <span class="service-tag">Traditional Attire</span>
-                        <span class="service-tag">Bridal Wear</span>
-                    </div>
-
-                    <div class="artisan-actions">
-                        <button class="btn btn-outline" onclick="viewArtisanProfile('bisi')">View Profile</button>
-                        <button class="btn btn-primary" onclick="bookArtisan('bisi')">Book Now</button>
-                    </div>
+                <div class="artisan-details">
+                    <p><i class="fas fa-map-marker-alt"></i> Ibadan • 3km away</p>
+                    <p><i class="fas fa-clock"></i> 12 years experience</p>
+                    <p><i class="fas fa-check-circle"></i> 99% completion rate</p>
                 </div>
+
+                <div class="artisan-services">
+                    <span class="service-tag">Clothing Alterations</span>
+                    <span class="service-tag">Traditional Attire</span>
+                    <span class="service-tag">Bridal Wear</span>
+                </div>
+
+                <div class="artisan-actions">
+                    <button class="btn btn-outline" onclick="viewArtisanProfile('bisi')">View Profile</button>
+                    <button class="btn btn-primary" onclick="bookArtisan('bisi')">Book Now</button>
+                </div>
+            </div>
             </div>
 
             <div class="pagination">
@@ -419,7 +660,8 @@
                         <button type="submit" class="btn btn-primary btn-full">Create Customer Account</button>
                     </form>
 
-                    <p class="login-link">Already have an account? <a href="#" onclick="showPage('login')">Log In</a></p>
+                    <p class="login-link">Already have an account? <a href="#" onclick="showPage('login')">Log In</a>
+                    </p>
                 </div>
 
                 <!-- Artisan Registration Form -->
@@ -480,7 +722,8 @@
                         <button type="submit" class="btn btn-secondary btn-full">Create Artisan Account</button>
                     </form>
 
-                    <p class="login-link">Already have an account? <a href="#" onclick="showPage('login')">Log In</a></p>
+                    <p class="login-link">Already have an account? <a href="#" onclick="showPage('login')">Log In</a>
+                    </p>
                 </div>
             </div>
         </section>
@@ -494,17 +737,17 @@
                 </div>
 
                 <form onsubmit="loginUser(event)">
-    <div class="form-group">
-        <label for="loginPhone">Email Address *</label>
-        <input type="email" id="loginPhone" required placeholder="email@example.com">
-    </div>
+                    <div class="form-group">
+                        <label for="loginPhone">Email Address *</label>
+                        <input type="email" id="loginPhone" required placeholder="email@example.com">
+                    </div>
 
-    <div class="form-group">
-        <label for="loginPassword">Password *</label>
-        <input type="password" id="loginPassword" required>
-    </div>
-    <button type="submit" class="btn btn-primary btn-full">Log In</button>
-</form>
+                    <div class="form-group">
+                        <label for="loginPassword">Password *</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Log In</button>
+                </form>
             </div>
         </section>
 
@@ -760,7 +1003,8 @@
                                 <p>Electrical • Kano</p>
                             </div>
                             <div class="verification-actions">
-                                <button class="btn btn-small btn-success" onclick="approveVerification()">Approve</button>
+                                <button class="btn btn-small btn-success"
+                                    onclick="approveVerification()">Approve</button>
                                 <button class="btn btn-small btn-outline" onclick="rejectVerification()">Reject</button>
                             </div>
                         </div>
@@ -886,8 +1130,10 @@
             <div class="about-content">
                 <div class="about-section">
                     <h3>Our Mission</h3>
-                    <p>Artiz was founded to create a fair marketplace where artisans can connect directly with customers without middlemen taking commissions.</p>
-                    <p>We believe skilled professionals deserve to keep 100% of their earnings while customers get quality service with payment protection.</p>
+                    <p>Artiz was founded to create a fair marketplace where artisans can connect directly with customers
+                        without middlemen taking commissions.</p>
+                    <p>We believe skilled professionals deserve to keep 100% of their earnings while customers get
+                        quality service with payment protection.</p>
                 </div>
 
                 <div class="values-grid">
@@ -961,10 +1207,18 @@
         <section id="forgot-password" class="page">
             <div class="page-header">
                 <h2>Reset Password</h2>
+                <p>Enter your email to receive a password reset link</p>
             </div>
-            <div class="page-content">
-                <p>Password reset functionality</p>
-                <button onclick="showPage('login')" class="btn btn-outline">Back to Login</button>
+            <div class="login-container">
+                <form onsubmit="resetPassword(event)">
+                    <div class="form-group">
+                        <label for="resetEmail">Email Address *</label>
+                        <input type="email" id="resetEmail" required placeholder="email@example.com">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Send Reset Link</button>
+                </form>
+                <p class="login-link" style="margin-top: 1rem;"><a href="#" onclick="showPage('login')">← Back to
+                        Login</a></p>
             </div>
         </section>
 
@@ -988,6 +1242,67 @@
             </div>
         </section>
     </main>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal-overlay" onclick="if(event.target===this)closeBookingModal()">
+        <div class="modal-content">
+            <h3><i class="fas fa-calendar-check"></i> Book Artisan</h3>
+            <p>Booking: <strong id="bookingArtisanName"></strong> <span id="bookingArtisanTrade"
+                    style="color:#888;"></span></p>
+            <input type="hidden" id="bookingArtisanId">
+            <form onsubmit="submitBooking(event)">
+                <div class="form-group">
+                    <label>Service Needed *</label>
+                    <input type="text" id="bookingService" required placeholder="e.g. Fix kitchen sink">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="bookingDescription" rows="3" placeholder="Describe what you need done..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Date</label>
+                    <input type="datetime-local" id="bookingDate">
+                </div>
+                <div class="form-group">
+                    <label>Your Location *</label>
+                    <input type="text" id="bookingLocation" required placeholder="e.g. Lekki, Lagos">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeBookingModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Booking Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal-overlay" onclick="if(event.target===this)closeReviewModal()">
+        <div class="modal-content">
+            <h3><i class="fas fa-star"></i> Leave a Review</h3>
+            <input type="hidden" id="reviewBookingId">
+            <input type="hidden" id="reviewArtisanId">
+            <form onsubmit="submitReview(event)">
+                <div class="form-group">
+                    <label>Rating *</label>
+                    <select id="reviewRating" required>
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent (5)</option>
+                        <option value="4">⭐⭐⭐⭐ Very Good (4)</option>
+                        <option value="3">⭐⭐⭐ Good (3)</option>
+                        <option value="2">⭐⭐ Fair (2)</option>
+                        <option value="1">⭐ Poor (1)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Review</label>
+                    <textarea id="reviewComment" rows="4" placeholder="Share your experience..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeReviewModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer>
@@ -1026,28 +1341,33 @@
         </div>
     </footer>
 
+    <!-- Supabase Backend -->
+    <script src="supabase.js"></script>
+
     <script>
         // Page Management
         function showPage(pageId, param = null) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-
-            // Show requested page
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             const page = document.getElementById(pageId);
             if (page) {
                 page.classList.add('active');
                 window.scrollTo(0, 0);
+                if (param === 'artisan') selectUserType('artisan');
+                else if (param === 'customer') selectUserType('customer');
 
-                // Handle parameters
-                if (param === 'artisan') {
-                    selectUserType('artisan');
-                } else if (param === 'customer') {
-                    selectUserType('customer');
+                // Load dynamic data for specific pages
+                if (pageId === 'find-artisan') loadArtisans();
+                if (pageId === 'artisan-services') loadArtisanServices();
+                if (pageId === 'customer-dashboard') {
+                    const uid = localStorage.getItem('userId');
+                    if (uid) loadCustomerDashboard(uid);
                 }
+                if (pageId === 'artisan-dashboard') {
+                    const uid = localStorage.getItem('userId');
+                    if (uid) loadArtisanDashboard(uid);
+                }
+                if (pageId === 'admin-dashboard') loadAdminDashboard();
             } else {
-                // Fallback to landing
                 showPage('landing');
             }
         }
@@ -1058,65 +1378,20 @@
             const artisanForm = document.getElementById('artisanForm');
             const customerOption = document.getElementById('customerOption');
             const artisanOption = document.getElementById('artisanOption');
-
             if (type === 'customer') {
-                customerForm.classList.add('active');
-                artisanForm.classList.remove('active');
-                customerOption.classList.add('active');
-                artisanOption.classList.remove('active');
+                customerForm.classList.add('active'); artisanForm.classList.remove('active');
+                customerOption.classList.add('active'); artisanOption.classList.remove('active');
             } else if (type === 'artisan') {
-                artisanForm.classList.add('active');
-                customerForm.classList.remove('active');
-                artisanOption.classList.add('active');
-                customerOption.classList.remove('active');
-            }
-        }
-
-        // Go to appropriate dashboard
-        function goToDashboard() {
-            // Check current user type (simulated)
-            const userType = localStorage.getItem('userType') || 'customer';
-            if (userType === 'admin') {
-                showPage('admin-dashboard');
-            } else if (userType === 'artisan') {
-                showPage('artisan-dashboard');
-            } else {
-                showPage('customer-dashboard');
-            }
-        }
-
-        // View Artisan Profile
-        function viewArtisanProfile(artisanId) {
-            alert(`Viewing profile of artisan: ${artisanId}`);
-            // In real app, would show detailed profile page
-        }
-
-        // Book Artisan
-        function bookArtisan(artisanId) {
-            const isLoggedIn = document.querySelector('.logged-in').style.display !== 'none';
-
-            if (!isLoggedIn) {
-                if (confirm('You need to log in to book an artisan. Go to login page?')) {
-                    showPage('login');
-                }
-            } else {
-                alert(`Booking request sent to artisan: ${artisanId}`);
-                // In real app, would initiate booking process
+                artisanForm.classList.add('active'); customerForm.classList.remove('active');
+                artisanOption.classList.add('active'); customerOption.classList.remove('active');
             }
         }
 
         // Feature Tabs
         function openFeatureTab(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
         }
 
@@ -1129,15 +1404,12 @@
         function sendChatMessage() {
             const input = document.getElementById('chatMessage');
             const message = input.value.trim();
-
             if (message) {
                 const messagesDiv = document.querySelector('.chat-messages');
                 const userMessage = document.createElement('div');
                 userMessage.className = 'message user';
                 userMessage.innerHTML = `<p>${message}</p>`;
                 messagesDiv.appendChild(userMessage);
-
-                // Simulate bot response
                 setTimeout(() => {
                     const botMessage = document.createElement('div');
                     botMessage.className = 'message bot';
@@ -1145,69 +1417,16 @@
                     messagesDiv.appendChild(botMessage);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 }, 1000);
-
                 input.value = '';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set landing page as active
+        document.addEventListener('DOMContentLoaded', function () {
             showPage('landing');
-
-            // Initialize chat as hidden
             document.querySelector('.chat-widget').style.display = 'none';
-
-            // Demo: Set up some localStorage for user type simulation
-            if (!localStorage.getItem('userType')) {
-                localStorage.setItem('userType', 'customer');
-            }
         });
-
-        // Artisan Dashboard Functions
-        function acceptJob() {
-            alert('Job accepted! Customer has been notified.');
-        }
-
-        function declineJob() {
-            if (confirm('Are you sure you want to decline this job?')) {
-                alert('Job declined.');
-            }
-        }
-
-        // Admin Functions
-        function showVerifications() {
-            alert('Showing pending verifications...');
-        }
-
-        function showDisputes() {
-            alert('Showing active disputes...');
-        }
-
-        function approveVerification() {
-            alert('Artisan verification approved!');
-        }
-
-        function rejectVerification() {
-            alert('Artisan verification rejected.');
-        }
-
-        // Customer Dashboard Functions
-        function viewBooking() {
-            alert('Viewing booking details...');
-        }
-
-        function messageArtisan() {
-            alert('Opening message interface...');
-        }
-
-        // Contact Form
-        function sendContactMessage(event) {
-            event.preventDefault();
-            alert('Thank you for your message! We will respond within 24 hours.');
-            event.target.reset();
-        }
     </script>
 </body>
 
