@@ -8,6 +8,22 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ============================================
+// LOADING SPINNER
+// ============================================
+
+function showLoading(text = 'Please wait...') {
+    const overlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    if (overlay) { overlay.classList.add('active'); }
+    if (loadingText) { loadingText.textContent = text; }
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) { overlay.classList.remove('active'); }
+}
+
+// ============================================
 // AUTHENTICATION
 // ============================================
 
@@ -32,6 +48,7 @@ async function registerUser(event, userType) {
         return;
     }
 
+    showLoading('Creating your account...');
     try {
         const { data: authData, error: authError } = await _supabase.auth.signUp({
             email,
@@ -65,6 +82,8 @@ async function registerUser(event, userType) {
         showPage('login');
     } catch (error) {
         showToast(error.message, 'error');
+    } finally {
+        hideLoading();
     }
 }
 
@@ -73,6 +92,7 @@ async function loginUser(event) {
     const email = document.getElementById('loginPhone').value;
     const password = document.getElementById('loginPassword').value;
 
+    showLoading('Signing you in...');
     try {
         const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -104,6 +124,8 @@ async function loginUser(event) {
         showToast(`Welcome back, ${profile.full_name.split(' ')[0]}!`, 'success');
     } catch (error) {
         showToast(error.message, 'error');
+    } finally {
+        hideLoading();
     }
 }
 
@@ -362,6 +384,7 @@ async function submitBooking(event) {
     const scheduledDate = document.getElementById('bookingDate').value;
     const location = document.getElementById('bookingLocation').value;
 
+    showLoading('Sending booking request...');
     try {
         const { error } = await _supabase
             .from('bookings')
@@ -381,6 +404,8 @@ async function submitBooking(event) {
         showToast('Booking request sent successfully! The artisan will respond soon.', 'success');
     } catch (error) {
         showToast('Failed to create booking: ' + error.message, 'error');
+    } finally {
+        hideLoading();
     }
 }
 
@@ -902,8 +927,11 @@ function showToast(message, type = 'info') {
 function updateUIForLoggedInUser(profile) {
     document.querySelector('.logged-out').style.display = 'none';
     document.querySelector('.logged-in').style.display = 'block';
+    const firstName = profile.full_name ? profile.full_name.split(' ')[0] : 'User';
     const nameSpan = document.querySelector('.user-name');
-    if (nameSpan) nameSpan.innerText = `Hi, ${profile.full_name.split(' ')[0]}`;
+    if (nameSpan) nameSpan.innerText = `Hi, ${firstName}`;
+    const avatar = document.getElementById('userAvatarNav');
+    if (avatar) avatar.textContent = firstName.charAt(0).toUpperCase();
 }
 
 // ============================================
