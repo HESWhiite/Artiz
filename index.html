@@ -325,6 +325,8 @@
                             <div class="dropdown">
                                 <a href="#" onclick="goToDashboard()"><i class="fas fa-tachometer-alt"></i> My
                                     Dashboard</a>
+                                <a href="#" onclick="showPage('my-messages')"><i class="fas fa-comments"></i>
+                                    Messages</a>
                                 <a href="#" onclick="showPage('artisan-services')"><i class="fas fa-cog"></i> My
                                     Services</a>
                                 <div class="dropdown-divider"></div>
@@ -804,6 +806,19 @@
                     </div>
                     <button type="submit" class="btn btn-primary btn-full">Log In</button>
                 </form>
+            </div>
+        </section>
+
+        <!-- My Messages -->
+        <section id="my-messages" class="page">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-comments"></i> My Messages</h2>
+                <button class="btn btn-outline" onclick="goToDashboard()">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+            <div class="conversations-list">
+                <p class="no-data">Loading conversations...</p>
             </div>
         </section>
 
@@ -1360,6 +1375,400 @@
         </div>
     </div>
 
+    <!-- Price Quote Modal -->
+    <div id="quoteModal" class="modal-overlay" onclick="if(event.target===this)closeQuoteModal()">
+        <div class="modal-content">
+            <h3><i class="fas fa-tag"></i> Send Price Quote</h3>
+            <input type="hidden" id="quoteBookingId">
+            <form onsubmit="submitQuote(event)">
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" id="quoteAmount" required placeholder="e.g. 15000" min="1" step="100">
+                </div>
+                <div class="form-group">
+                    <label>Note (optional)</label>
+                    <textarea id="quoteNote" rows="3"
+                        placeholder="Include any details about what this price covers..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeQuoteModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send Quote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal-overlay" onclick="if(event.target===this)closeMessagePanel()">
+        <div class="modal-content message-modal-content">
+            <div class="msg-header">
+                <h3><i class="fas fa-comments"></i> <span id="msgRecipientName">Chat</span></h3>
+                <button class="btn-icon" onclick="closeMessagePanel()"><i class="fas fa-times"></i></button>
+            </div>
+            <input type="hidden" id="msgBookingId">
+            <div id="msgList" class="msg-list"></div>
+            <form class="msg-form" onsubmit="sendMessage(event)">
+                <input type="text" id="msgInput" placeholder="Type a message..." autocomplete="off" required>
+                <button type="submit" class="btn btn-primary btn-send"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Feature Styles -->
+    <style>
+        /* ========== MESSAGE MODAL ========== */
+        .message-modal-content {
+            max-width: 500px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+        }
+
+        .msg-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .msg-header .btn-icon {
+            color: #fff;
+            font-size: 1.1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .msg-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            min-height: 300px;
+            max-height: 50vh;
+            background: #f8fafc;
+        }
+
+        .msg {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .msg-sent {
+            justify-content: flex-end;
+        }
+
+        .msg-received {
+            justify-content: flex-start;
+        }
+
+        .msg-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            line-height: 1.4;
+        }
+
+        .msg-sent .msg-bubble {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-received .msg-bubble {
+            background: #e2e8f0;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-bubble p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .msg-name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            opacity: 0.7;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .msg-time {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            display: block;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .msg-form {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #fff;
+        }
+
+        .msg-form input {
+            flex: 1;
+            border: 1px solid #cbd5e1;
+            border-radius: 24px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .msg-form input:focus {
+            border-color: #3b82f6;
+        }
+
+        .btn-send {
+            border-radius: 50% !important;
+            width: 42px;
+            height: 42px;
+            padding: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: unset !important;
+        }
+
+        /* ========== FAVORITE BUTTON ========== */
+        .btn-favorite,
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #94a3b8;
+            transition: color 0.2s, transform 0.2s;
+            padding: 6px;
+        }
+
+        .btn-favorite:hover,
+        .btn-icon:hover {
+            color: #ef4444;
+            transform: scale(1.2);
+        }
+
+        .btn-favorite.favorite-active,
+        .btn-icon.favorite-active {
+            color: #ef4444;
+        }
+
+        .favorite-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: #fff;
+            transition: box-shadow 0.2s;
+        }
+
+        .favorite-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .favorite-card img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .favorite-card h4 {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .favorite-card p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* ========== AVAILABILITY ========== */
+        .availability-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .availability-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .availability-day {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            min-width: 140px;
+            cursor: pointer;
+        }
+
+        .availability-day input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+        }
+
+        .availability-times {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .availability-times input[type="time"] {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        /* ========== BOOKING STATUS BADGES ========== */
+        .status.quoted {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.awaiting_confirmation {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        .booking-actions-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            .availability-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .booking-actions-group {
+                flex-direction: column;
+            }
+        }
+
+        /* ========== CONVERSATIONS LIST ========== */
+        .conversations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+
+        .convo-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            background: #fff;
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.15s;
+        }
+
+        .convo-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .convo-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .convo-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .convo-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .convo-top h4 {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .convo-time {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .convo-service {
+            margin: 2px 0;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .convo-service .status {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            margin-left: 6px;
+        }
+
+        .convo-preview {
+            margin: 4px 0 0;
+            font-size: 0.85rem;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+
     <!-- Footer -->
     <footer>
         <div class="footer-container">
@@ -1423,6 +1832,7 @@
                     if (uid) loadArtisanDashboard(uid);
                 }
                 if (pageId === 'admin-dashboard') loadAdminDashboard();
+                if (pageId === 'my-messages') loadMyMessages();
             } else {
                 showPage('landing');
             }

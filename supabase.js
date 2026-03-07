@@ -1,11 +1,11 @@
-// ============================================
-// ARTIZ PLATFORM — SUPABASE BACKEND
-// ============================================
 
 const SUPABASE_URL = 'https://kwtcjrcouakkzevvulxu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3dGNqcmNvdWFra3pldnZ1bHh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MDEzODgsImV4cCI6MjA4NTE3NzM4OH0.no2HsSeNj_p2l91aQQvf5H6giT9WwxBbWDJlAM2HBPs';
 
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Track active realtime subscriptions
+let _messageSubscription = null;
 
 // ============================================
 // LOADING SPINNER
@@ -245,6 +245,7 @@ function renderArtisanCards(artisans) {
                     <div class="artisan-actions">
                         <button class="btn btn-outline" onclick="viewArtisanProfile('${artisan.id}')">View Profile</button>
                         <button class="btn btn-primary" onclick="bookArtisan('${artisan.id}')">Book Now</button>
+                        <button class="btn-icon btn-favorite" id="fav-${artisan.id}" onclick="toggleFavorite('${artisan.id}')"><i class="far fa-heart"></i></button>
                     </div>
                 </div>
             `;
@@ -416,9 +417,17 @@ function closeBookingModal() {
 
 async function updateBookingStatus(bookingId, newStatus) {
     try {
+        const updateData = { status: newStatus };
+
+        // Two-sided completion: artisan marks complete → awaiting_confirmation
+        if (newStatus === 'completed') {
+            updateData.status = 'awaiting_confirmation';
+            updateData.artisan_completed = true;
+        }
+
         const { error } = await _supabase
             .from('bookings')
-            .update({ status: newStatus })
+            .update(updateData)
             .eq('id', bookingId);
 
         if (error) throw error;
@@ -427,22 +436,101 @@ async function updateBookingStatus(bookingId, newStatus) {
             confirmed: 'Booking confirmed! Customer has been notified.',
             declined: 'Booking declined.',
             in_progress: 'Job marked as in progress.',
-            completed: 'Job marked as completed!',
+            awaiting_confirmation: 'Job marked as done! Waiting for customer confirmation.',
+            completed: 'Job completed and confirmed!',
             cancelled: 'Booking cancelled.'
         };
 
-        showToast(messages[newStatus] || 'Booking updated.', 'success');
-
-        // Reload the appropriate dashboard
-        const userType = localStorage.getItem('userType');
-        const userId = localStorage.getItem('userId');
-        if (userType === 'artisan') {
-            loadArtisanDashboard(userId);
-        } else {
-            loadCustomerDashboard(userId);
-        }
+        showToast(messages[updateData.status] || 'Booking updated.', 'success');
+        _reloadDashboard();
     } catch (error) {
         showToast('Failed to update booking.', 'error');
+    }
+}
+
+// Customer confirms the job is completed
+async function confirmCompletion(bookingId) {
+    try {
+        const { error } = await _supabase
+            .from('bookings')
+            .update({ status: 'completed', customer_confirmed: true })
+            .eq('id', bookingId);
+
+        if (error) throw error;
+        showToast('Job confirmed as completed! You can now leave a review.', 'success');
+        _reloadDashboard();
+    } catch (error) {
+        showToast('Failed to confirm completion.', 'error');
+    }
+}
+
+// ============================================
+// PRICE QUOTING
+// ============================================
+
+function showQuoteModal(bookingId) {
+    document.getElementById('quoteBookingId').value = bookingId;
+    document.getElementById('quoteAmount').value = '';
+    document.getElementById('quoteNote').value = '';
+    document.getElementById('quoteModal').style.display = 'flex';
+}
+
+function closeQuoteModal() {
+    const modal = document.getElementById('quoteModal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function submitQuote(event) {
+    event.preventDefault();
+    const bookingId = document.getElementById('quoteBookingId').value;
+    const amount = parseFloat(document.getElementById('quoteAmount').value);
+    const note = document.getElementById('quoteNote').value;
+
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid price.', 'error');
+        return;
+    }
+
+    try {
+        const { error } = await _supabase
+            .from('bookings')
+            .update({ price_quote: amount, quote_note: note, status: 'quoted' })
+            .eq('id', bookingId);
+
+        if (error) throw error;
+        closeQuoteModal();
+        showToast('Price quote sent to customer!', 'success');
+        _reloadDashboard();
+    } catch (error) {
+        showToast('Failed to send quote: ' + error.message, 'error');
+    }
+}
+
+async function respondToQuote(bookingId, accept) {
+    try {
+        const newStatus = accept ? 'confirmed' : 'declined';
+        const { error } = await _supabase
+            .from('bookings')
+            .update({ status: newStatus })
+            .eq('id', bookingId);
+
+        if (error) throw error;
+        showToast(accept ? 'Quote accepted! Artisan will begin soon.' : 'Quote declined.', accept ? 'success' : 'info');
+        _reloadDashboard();
+    } catch (error) {
+        showToast('Failed to respond to quote.', 'error');
+    }
+}
+
+function _reloadDashboard() {
+    const userType = localStorage.getItem('userType');
+    const userId = localStorage.getItem('userId');
+    if (userType === 'artisan') {
+        loadArtisanDashboard(userId);
+    } else if (userType === 'admin') {
+        loadAdminDashboard();
+    } else {
+        loadCustomerDashboard(userId);
     }
 }
 
@@ -475,21 +563,23 @@ async function submitReview(event) {
 
         if (error) throw error;
 
-        // Update the artisan's average rating
-        const { data: reviews } = await _supabase
-            .from('reviews')
-            .select('rating')
-            .eq('reviewed_id', reviewedId);
-
-        if (reviews && reviews.length > 0) {
-            const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-            await _supabase
-                .from('profiles')
-                .update({
-                    rating: avgRating.toFixed(2),
-                    total_reviews: reviews.length
-                })
-                .eq('id', reviewedId);
+        // Server-side rating update via Supabase RPC
+        // Falls back to client-side calculation if RPC not available
+        try {
+            await _supabase.rpc('update_artisan_rating', { artisan_uuid: reviewedId });
+        } catch (rpcError) {
+            console.warn('RPC not available, falling back to client-side rating calc:', rpcError);
+            const { data: reviews } = await _supabase
+                .from('reviews')
+                .select('rating')
+                .eq('reviewed_id', reviewedId);
+            if (reviews && reviews.length > 0) {
+                const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+                await _supabase
+                    .from('profiles')
+                    .update({ rating: avgRating.toFixed(2), total_reviews: reviews.length })
+                    .eq('id', reviewedId);
+            }
         }
 
         closeReviewModal();
@@ -525,7 +615,7 @@ async function loadCustomerDashboard(userId) {
             .eq('customer_id', userId)
             .order('created_at', { ascending: false });
 
-        const activeBookings = (bookings || []).filter(b => ['pending', 'confirmed', 'in_progress'].includes(b.status));
+        const activeBookings = (bookings || []).filter(b => ['pending', 'confirmed', 'in_progress', 'quoted', 'awaiting_confirmation'].includes(b.status));
         const completedBookings = (bookings || []).filter(b => b.status === 'completed');
 
         // Update stats
@@ -549,16 +639,54 @@ async function loadCustomerDashboard(userId) {
                             <h4>${b.service_name}</h4>
                             <p><i class="fas fa-user"></i> ${b.artisan?.full_name || 'Unknown'}</p>
                             <p><i class="fas fa-calendar"></i> ${b.scheduled_date ? new Date(b.scheduled_date).toLocaleDateString() : 'Not scheduled'}</p>
-                            <span class="status ${b.status}">${b.status.replace('_', ' ')}</span>
+                            ${b.price_quote ? `<p><i class="fas fa-money-bill"></i> Quote: ₦${Number(b.price_quote).toLocaleString()}${b.quote_note ? ' — ' + b.quote_note : ''}</p>` : ''}
+                            <span class="status ${b.status}">${b.status.replace(/_/g, ' ')}</span>
                         </div>
-                        <div>
+                        <div class="booking-actions-group">
+                            ${b.status === 'quoted' ? `
+                                <button class="btn btn-small btn-success" onclick="respondToQuote('${b.id}', true)">Accept Quote</button>
+                                <button class="btn btn-small btn-outline" onclick="respondToQuote('${b.id}', false)">Decline</button>
+                            ` : ''}
+                            ${b.status === 'awaiting_confirmation' ? `
+                                <button class="btn btn-small btn-success" onclick="confirmCompletion('${b.id}')"><i class="fas fa-check"></i> Confirm Done</button>
+                            ` : ''}
                             ${b.status === 'completed' ? `<button class="btn btn-small btn-secondary" onclick="showReviewModal('${b.id}', '${b.artisan_id}')">Leave Review</button>` : ''}
                             ${b.status === 'pending' ? `<button class="btn btn-small btn-outline" onclick="updateBookingStatus('${b.id}', 'cancelled')">Cancel</button>` : ''}
+                            ${['confirmed', 'in_progress', 'awaiting_confirmation'].includes(b.status) ? `<button class="btn btn-small btn-outline" onclick="openMessagePanel('${b.id}', '${(b.artisan?.full_name || 'Artisan').replace(/'/g, "\\'")}')"><i class="fas fa-comment"></i> Message</button>` : ''}
                         </div>
                     </div>
                 `).join('');
             } else {
                 bookingsSection.innerHTML = '<p class="no-data">No bookings yet. <a href="#" onclick="showPage(\'find-artisan\')">Find an artisan</a> to get started!</p>';
+            }
+        }
+
+        // Load and render favorites
+        const { data: favorites } = await _supabase
+            .from('favorites')
+            .select('*, artisan:artisan_id(id, full_name, trade, avatar_url)')
+            .eq('customer_id', userId);
+
+        const favSection = document.querySelector('#customer-dashboard .favorites-list');
+        if (favSection) {
+            if (favorites && favorites.length > 0) {
+                favSection.innerHTML = favorites.map(f => {
+                    const a = f.artisan;
+                    const avatarUrl = a?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(a?.full_name || 'A')}&background=random`;
+                    return `
+                        <div class="favorite-card">
+                            <img src="${avatarUrl}" alt="${a?.full_name}">
+                            <div>
+                                <h4>${a?.full_name || 'Artisan'}</h4>
+                                <p>${a?.trade || 'General Artisan'}</p>
+                            </div>
+                            <button class="btn-icon" onclick="viewArtisanProfile('${a?.id}')"><i class="fas fa-eye"></i></button>
+                            <button class="btn-icon favorite-active" onclick="toggleFavorite('${a?.id}')"><i class="fas fa-heart"></i></button>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                favSection.innerHTML = '<p class="no-data">No favorite artisans yet. Browse artisans and tap the heart icon!</p>';
             }
         }
     } catch (error) {
@@ -580,7 +708,7 @@ async function loadArtisanDashboard(userId) {
             .order('created_at', { ascending: false });
 
         const pendingRequests = (bookings || []).filter(b => b.status === 'pending');
-        const activeJobs = (bookings || []).filter(b => ['confirmed', 'in_progress'].includes(b.status));
+        const activeJobs = (bookings || []).filter(b => ['confirmed', 'in_progress', 'quoted', 'awaiting_confirmation'].includes(b.status));
         const completedJobs = (bookings || []).filter(b => b.status === 'completed');
 
         // Load artisan's profile for stats
@@ -616,19 +744,25 @@ async function loadArtisanDashboard(userId) {
                             <h4>${b.service_name}</h4>
                             <p><i class="fas fa-user"></i> ${b.customer?.full_name || 'Customer'}</p>
                             <p><i class="fas fa-map-marker-alt"></i> ${b.location || b.customer?.location || 'Not specified'}</p>
-                            ${b.price_estimate ? `<p><i class="fas fa-money-bill"></i> ₦${Number(b.price_estimate).toLocaleString()}</p>` : ''}
-                            <span class="status ${b.status}">${b.status.replace('_', ' ')}</span>
+                            ${b.price_quote ? `<p><i class="fas fa-money-bill"></i> Quoted: ₦${Number(b.price_quote).toLocaleString()}</p>` : ''}
+                            <span class="status ${b.status}">${b.status.replace(/_/g, ' ')}</span>
                         </div>
                         <div class="request-actions">
                             ${b.status === 'pending' ? `
-                                <button class="btn btn-small btn-success" onclick="updateBookingStatus('${b.id}', 'confirmed')">Accept</button>
+                                <button class="btn btn-small btn-success" onclick="showQuoteModal('${b.id}')"><i class="fas fa-tag"></i> Send Quote</button>
                                 <button class="btn btn-small btn-outline" onclick="updateBookingStatus('${b.id}', 'declined')">Decline</button>
                             ` : ''}
                             ${b.status === 'confirmed' ? `
                                 <button class="btn btn-small btn-primary" onclick="updateBookingStatus('${b.id}', 'in_progress')">Start Job</button>
                             ` : ''}
                             ${b.status === 'in_progress' ? `
-                                <button class="btn btn-small btn-success" onclick="updateBookingStatus('${b.id}', 'completed')">Complete</button>
+                                <button class="btn btn-small btn-success" onclick="updateBookingStatus('${b.id}', 'completed')">Mark Done</button>
+                            ` : ''}
+                            ${b.status === 'awaiting_confirmation' ? `
+                                <span class="status-label"><i class="fas fa-hourglass-half"></i> Awaiting customer confirmation</span>
+                            ` : ''}
+                            ${['confirmed', 'in_progress', 'awaiting_confirmation'].includes(b.status) ? `
+                                <button class="btn btn-small btn-outline" onclick="openMessagePanel('${b.id}', '${(b.customer?.full_name || 'Customer').replace(/'/g, "\\'")}')"><i class="fas fa-comment"></i> Message</button>
                             ` : ''}
                         </div>
                     </div>
@@ -730,8 +864,16 @@ async function loadArtisanServices() {
             `).join('') : '<p class="no-data">No services added yet.</p>'}
         </div>
 
+        <h3 style="margin-top: 2rem;"><i class="fas fa-calendar-alt"></i> Availability Schedule</h3>
+        <p style="color: #666; margin-bottom: 1rem;">Set your available days and working hours so customers know when to book you.</p>
+        <div id="availabilitySettings" class="availability-grid"></div>
+        <button onclick="saveAvailability()" class="btn btn-secondary" style="margin-top: 1rem;"><i class="fas fa-save"></i> Save Availability</button>
+
         <button onclick="showPage('artisan-dashboard')" class="btn btn-outline" style="margin-top: 1rem;">← Back to Dashboard</button>
     `;
+
+    // Load availability settings
+    loadAvailabilitySettings(session.user.id);
 }
 
 async function addService(event) {
@@ -884,6 +1026,330 @@ async function sendContactMessage(event) {
 }
 
 // ============================================
+// IN-APP MESSAGING
+// ============================================
+
+async function loadMyMessages() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return;
+
+    const userId = session.user.id;
+    const userType = localStorage.getItem('userType');
+
+    // Get all bookings for this user that might have messages
+    let query = _supabase
+        .from('bookings')
+        .select('*, customer:customer_id(full_name), artisan:artisan_id(full_name)')
+        .in('status', ['confirmed', 'in_progress', 'awaiting_confirmation', 'completed', 'quoted']);
+
+    if (userType === 'artisan') {
+        query = query.eq('artisan_id', userId);
+    } else {
+        query = query.eq('customer_id', userId);
+    }
+
+    const { data: bookings } = await query.order('created_at', { ascending: false });
+
+    // For each booking, get latest message
+    const container = document.querySelector('#my-messages .conversations-list');
+    if (!container) return;
+
+    if (!bookings || bookings.length === 0) {
+        container.innerHTML = '<p class="no-data">No conversations yet. Messages will appear here when you communicate with artisans or customers on active bookings.</p>';
+        return;
+    }
+
+    // Fetch latest message for each booking
+    const convos = await Promise.all(bookings.map(async (b) => {
+        const { data: msgs } = await _supabase
+            .from('messages')
+            .select('content, created_at, sender_id')
+            .eq('booking_id', b.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        const lastMsg = msgs && msgs.length > 0 ? msgs[0] : null;
+        const otherName = userType === 'artisan'
+            ? (b.customer?.full_name || 'Customer')
+            : (b.artisan?.full_name || 'Artisan');
+
+        return { booking: b, lastMsg, otherName };
+    }));
+
+    // Sort: bookings with messages first, then by latest message time
+    convos.sort((a, b) => {
+        if (a.lastMsg && !b.lastMsg) return -1;
+        if (!a.lastMsg && b.lastMsg) return 1;
+        if (a.lastMsg && b.lastMsg) return new Date(b.lastMsg.created_at) - new Date(a.lastMsg.created_at);
+        return 0;
+    });
+
+    container.innerHTML = convos.map(({ booking: b, lastMsg, otherName }) => {
+        const initial = otherName.charAt(0).toUpperCase();
+        const preview = lastMsg
+            ? `<p class="convo-preview">${lastMsg.sender_id === userId ? 'You: ' : ''}${lastMsg.content.substring(0, 60)}${lastMsg.content.length > 60 ? '...' : ''}</p>`
+            : '<p class="convo-preview" style="color:#94a3b8;">No messages yet — start a conversation</p>';
+        const time = lastMsg
+            ? `<small class="convo-time">${new Date(lastMsg.created_at).toLocaleDateString()} ${new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>`
+            : '';
+
+        return `
+            <div class="convo-card" onclick="openMessagePanel('${b.id}', '${otherName.replace(/'/g, "\\'")}')">
+                <div class="convo-avatar">${initial}</div>
+                <div class="convo-info">
+                    <div class="convo-top">
+                        <h4>${otherName}</h4>
+                        ${time}
+                    </div>
+                    <p class="convo-service"><i class="fas fa-briefcase"></i> ${b.service_name} <span class="status ${b.status}">${b.status.replace(/_/g, ' ')}</span></p>
+                    ${preview}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function openMessagePanel(bookingId, otherUserName) {
+    const panel = document.getElementById('messageModal');
+    if (!panel) return;
+
+    document.getElementById('msgBookingId').value = bookingId;
+    document.getElementById('msgRecipientName').textContent = otherUserName;
+    document.getElementById('msgInput').value = '';
+    panel.style.display = 'flex';
+
+    await loadMessages(bookingId);
+
+    // Subscribe to new messages in real-time
+    if (_messageSubscription) {
+        _messageSubscription.unsubscribe();
+    }
+    _messageSubscription = _supabase
+        .channel(`messages-${bookingId}`)
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `booking_id=eq.${bookingId}`
+        }, (payload) => {
+            appendMessage(payload.new);
+        })
+        .subscribe();
+}
+
+async function loadMessages(bookingId) {
+    const container = document.getElementById('msgList');
+    if (!container) return;
+
+    const { data: messages } = await _supabase
+        .from('messages')
+        .select('*, sender:sender_id(full_name)')
+        .eq('booking_id', bookingId)
+        .order('created_at', { ascending: true });
+
+    const currentUserId = localStorage.getItem('userId');
+    container.innerHTML = (messages || []).map(m => {
+        const isMe = m.sender_id === currentUserId;
+        return `
+            <div class="msg ${isMe ? 'msg-sent' : 'msg-received'}">
+                <div class="msg-bubble">
+                    ${!isMe ? `<small class="msg-name">${m.sender?.full_name || 'User'}</small>` : ''}
+                    <p>${m.content}</p>
+                    <small class="msg-time">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                </div>
+            </div>
+        `;
+    }).join('') || '<p class="no-data" style="padding:20px;">No messages yet. Start the conversation!</p>';
+
+    container.scrollTop = container.scrollHeight;
+}
+
+function appendMessage(msg) {
+    const container = document.getElementById('msgList');
+    if (!container) return;
+    const noData = container.querySelector('.no-data');
+    if (noData) noData.remove();
+
+    const currentUserId = localStorage.getItem('userId');
+    const isMe = msg.sender_id === currentUserId;
+    const div = document.createElement('div');
+    div.className = `msg ${isMe ? 'msg-sent' : 'msg-received'}`;
+    div.innerHTML = `
+        <div class="msg-bubble">
+            <p>${msg.content}</p>
+            <small class="msg-time">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+        </div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+async function sendMessage(event) {
+    event.preventDefault();
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return;
+
+    const bookingId = document.getElementById('msgBookingId').value;
+    const input = document.getElementById('msgInput');
+    const content = input.value.trim();
+    if (!content) return;
+
+    input.value = '';
+    try {
+        const { error } = await _supabase
+            .from('messages')
+            .insert([{
+                booking_id: bookingId,
+                sender_id: session.user.id,
+                content: content
+            }]);
+        if (error) throw error;
+    } catch (error) {
+        showToast('Failed to send message.', 'error');
+    }
+}
+
+function closeMessagePanel() {
+    const panel = document.getElementById('messageModal');
+    if (panel) panel.style.display = 'none';
+    if (_messageSubscription) {
+        _messageSubscription.unsubscribe();
+        _messageSubscription = null;
+    }
+}
+
+// ============================================
+// FAVORITES
+// ============================================
+
+async function toggleFavorite(artisanId) {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) {
+        showToast('Please log in to save favorites.', 'error');
+        return;
+    }
+
+    try {
+        // Check if already favorited
+        const { data: existing } = await _supabase
+            .from('favorites')
+            .select('id')
+            .eq('customer_id', session.user.id)
+            .eq('artisan_id', artisanId)
+            .maybeSingle();
+
+        if (existing) {
+            await _supabase.from('favorites').delete().eq('id', existing.id);
+            showToast('Removed from favorites.', 'info');
+            updateFavoriteButton(artisanId, false);
+        } else {
+            await _supabase.from('favorites').insert([{
+                customer_id: session.user.id,
+                artisan_id: artisanId
+            }]);
+            showToast('Added to favorites!', 'success');
+            updateFavoriteButton(artisanId, true);
+        }
+
+        // Reload favorites in dashboard if visible
+        const userId = localStorage.getItem('userId');
+        if (userId && document.querySelector('#customer-dashboard.active')) {
+            loadCustomerDashboard(userId);
+        }
+    } catch (error) {
+        showToast('Failed to update favorites.', 'error');
+    }
+}
+
+function updateFavoriteButton(artisanId, isFavorited) {
+    const btn = document.getElementById(`fav-${artisanId}`);
+    if (btn) {
+        btn.innerHTML = isFavorited
+            ? '<i class="fas fa-heart"></i>'
+            : '<i class="far fa-heart"></i>';
+        btn.classList.toggle('favorite-active', isFavorited);
+    }
+}
+
+async function loadFavoriteStates() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return;
+
+    const { data: favorites } = await _supabase
+        .from('favorites')
+        .select('artisan_id')
+        .eq('customer_id', session.user.id);
+
+    if (favorites) {
+        favorites.forEach(f => updateFavoriteButton(f.artisan_id, true));
+    }
+}
+
+// ============================================
+// AVAILABILITY MANAGEMENT
+// ============================================
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+async function loadAvailabilitySettings(artisanId) {
+    const container = document.getElementById('availabilitySettings');
+    if (!container) return;
+
+    const { data: availability } = await _supabase
+        .from('availability')
+        .select('*')
+        .eq('artisan_id', artisanId)
+        .order('day_of_week');
+
+    const avMap = {};
+    (availability || []).forEach(a => { avMap[a.day_of_week] = a; });
+
+    container.innerHTML = DAY_NAMES.map((day, i) => {
+        const av = avMap[i] || { is_available: i >= 1 && i <= 5, start_time: '08:00', end_time: '18:00' };
+        return `
+            <div class="availability-row">
+                <label class="availability-day">
+                    <input type="checkbox" id="avail-check-${i}" ${av.is_available ? 'checked' : ''}>
+                    <span>${day}</span>
+                </label>
+                <div class="availability-times">
+                    <input type="time" id="avail-start-${i}" value="${av.start_time?.substring(0, 5) || '08:00'}">
+                    <span>to</span>
+                    <input type="time" id="avail-end-${i}" value="${av.end_time?.substring(0, 5) || '18:00'}">
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function saveAvailability() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return;
+
+    showLoading('Saving availability...');
+    try {
+        const rows = DAY_NAMES.map((_, i) => ({
+            artisan_id: session.user.id,
+            day_of_week: i,
+            is_available: document.getElementById(`avail-check-${i}`)?.checked || false,
+            start_time: document.getElementById(`avail-start-${i}`)?.value || '08:00',
+            end_time: document.getElementById(`avail-end-${i}`)?.value || '18:00'
+        }));
+
+        const { error } = await _supabase
+            .from('availability')
+            .upsert(rows, { onConflict: 'artisan_id,day_of_week' });
+
+        if (error) throw error;
+        showToast('Availability saved!', 'success');
+    } catch (error) {
+        showToast('Failed to save availability: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
 // UTILITY FUNCTIONS
 // ============================================
 
@@ -956,7 +1422,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Load artisans for the Find Artisan page
-    loadArtisans();
+    loadArtisans().then(() => loadFavoriteStates());
 
     // Wire up search/filter events
     const searchBtn = document.querySelector('.search-box .btn');
@@ -996,6 +1462,18 @@ window.approveVerification = approveVerification;
 window.rejectVerification = rejectVerification;
 window.applyFilters = applyFilters;
 window.goToDashboard = goToDashboard;
+// New features
+window.confirmCompletion = confirmCompletion;
+window.showQuoteModal = showQuoteModal;
+window.closeQuoteModal = closeQuoteModal;
+window.submitQuote = submitQuote;
+window.respondToQuote = respondToQuote;
+window.openMessagePanel = openMessagePanel;
+window.sendMessage = sendMessage;
+window.closeMessagePanel = closeMessagePanel;
+window.toggleFavorite = toggleFavorite;
+window.saveAvailability = saveAvailability;
+window.loadMyMessages = loadMyMessages;
 
 function goToDashboard() {
     const userType = localStorage.getItem('userType') || 'customer';
